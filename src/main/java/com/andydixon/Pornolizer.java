@@ -7,6 +7,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -56,7 +59,7 @@ public class Pornolizer {
         /**
         Grab elements to pornolize
          */
-        String[] elements = new String[]{"h1","h2","h3","h4","h5","h6","p","span"};
+        String[] elements = new String[]{"h1","h2","h3","h4","h5","h6","p"};
         for (String elementSelector: elements) {
             Elements elem = page.select(elementSelector);
 
@@ -80,7 +83,11 @@ public class Pornolizer {
             }
             //$c2->attr('href', $this->selfHost . '/pornolize?lang=' . $lang . '&url=' . $c2->attr('href'));
             String refurl = src.attr("href");
-            src.attr("href", "http://www.pornolize.com/pornolize/lang="+dictionary.language+"&url="+ refurl);
+            try {
+                src.attr("href", "http://www.pornolize.com/pornolize/?lang="+dictionary.language+"&url="+ URLEncoder.encode(refurl, StandardCharsets.UTF_8.name()));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
         }
         elem = page.select("img");
 
@@ -108,13 +115,9 @@ public class Pornolizer {
             }
         }
 
-
-
-
-        //page.select("head").append("<base href='http://" + URLTools.getHostName(url) + "' />");
-        page.select("head").prepend("<base href='" + URLTools.getScheme(doc.resultUrl) + "://" + URLTools.getHostName(doc.resultUrl) + "' test='foo' ></base>");
-        //page.select("head").append("<script async src=\"https://www.googletagmanager.com/gtag/js?id=UA-76162478-4\"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'UA-76162478-4');</script>");
-        //page.select("head").prepend("\n\n<!-- Converted by The Pornoliser (c)2021 Andy Dixon - pornolize.com / andydixon.com -->\n\n");
+        page.select("head").prepend("<base href='" + URLTools.getScheme(doc.resultUrl) + "://" + URLTools.getHostName(doc.resultUrl) + "' ></base>");
+        page.select("head").append("<script async src=\"https://www.googletagmanager.com/gtag/js?id=UA-76162478-4\"></script><script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'UA-76162478-4');</script>");
+        page.select("head").prepend("\n\n<!-- Converted by The Pornoliser (c)2021 Andy Dixon - pornolize.com / andydixon.com -->\n\n");
 
 
         return page;
